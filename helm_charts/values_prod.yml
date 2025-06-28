@@ -4,3 +4,4 @@ APP:
   REPLICAS: 4
   PORT: 8081
   IMAGE: jwoliv/docker-practice-prj:latest
+# helm install app-stage . --set APP.SUFFIX=stage --set APP.PORT=8082 --set TYPE_ENV=stage
