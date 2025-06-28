@@ -1,0 +1,127 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: docker-practice-prj
+    env: dev
+    owner: jwoliv
+  name: docker-practice-prj-deployment-autoscale
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: docker-practice-prj-autoscale
+  template:
+    metadata:
+      labels:
+        app: docker-practice-prj-autoscale
+    spec:
+      containers:
+      - image: jwoliv/docker-practice-prj:latest
+        name: docker-practice-prj-container
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+      - image: nginx:latest
+        name: nginx-container
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hz-autoscale-docker-practice-prj
+spec:
+  maxReplicas: 8
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 70
+        type: Utilization
+    type: Resource
+  - resource:
+      name: memory
+      target:
+        averageUtilization: 70
+        type: Utilization
+    type: Resource
+  minReplicas: 4
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: docker-practice-prj-deployment-autoscale
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker-practice-prj-service
+  labels:
+    app: docker-practice-prj-service
+spec:
+  ports:
+  - name: docker-practice-prj-port
+    port: 8080
+    targetPort: 8080
+  - name: nginx-port
+    port: 80
+    targetPort: 80
+  selector:
+    app: docker-practice-prj-autoscale
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: docker-practice-prj-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /dpp
+        pathType: Prefix
+        backend:
+          service:
+            name: docker-practice-prj-service
+            port:
+              number: 8080
+      - path: /nginx
+        pathType: Prefix
+        backend:
+          service:
+            name: docker-practice-prj-service
+            port:
+              number: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+  ports:
+    - name: http-port
+      protocol: TCP
+      port: 80
+      targetPort: http
+    - name: https-port
+      protocol: TCP
+      port: 443
+      targetPort: https
