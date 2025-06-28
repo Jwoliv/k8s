@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.APP.SUFFIX }}-deployment
+  labels:
+    app: {{ .Release.Name }}
+    env: dev
+    owner: jwoliv
+spec:
+  replicas: {{ .Values.APP.REPLICAS }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+        labels:
+          app: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          image: {{ .Values.APP.IMAGE }}
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          env:
+            - name: TYPE_ENV
+              value: {{ .Values.TYPE_ENV }}

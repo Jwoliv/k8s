@@ -1,0 +1,6 @@
+TYPE_ENV: prod
+APP:
+  SUFFIX: prod
+  REPLICAS: 4
+  PORT: 8081
+  IMAGE: jwoliv/docker-practice-prj:latest

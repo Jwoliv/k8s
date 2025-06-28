@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name:  {{ .Release.Name }}-service-{{ .Values.APP.SUFFIX }}
+spec:
+  selector:
+    app:  {{ .Release.Name }}
+  type:  LoadBalancer
+  ports:
+  - name: {{ .Release.Name }}-port
+    port:  {{ .Values.APP.PORT }}
+    targetPort:  8080
+    protocol: TCP  
