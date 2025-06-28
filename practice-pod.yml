@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: docker-practice-prj
+spec:
+  containers:
+    - name: docker-practice-prj-container
+      image: jwoliv/docker-practice-prj:latest
+      ports:
+        - containerPort: 8080
+      resources:
+        requests:
+          memory: "512Mi"
+          cpu: "500m"
+        limits:
+          memory: "1Gi"
+          cpu: "1"
